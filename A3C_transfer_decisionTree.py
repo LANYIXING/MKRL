@@ -1,5 +1,5 @@
 """
-by lan
+by lanyixing
 """
 import threading  # 多线程
 import tensorflow as tf
@@ -12,12 +12,12 @@ import plot_record as plot_record  # 画图与记录
 import time_record as time_record
 import pickle
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-f2 = open("decision_model/"+'dt_Acrobot-v110.txt', 'rb')
+# f2 = open("decision_model/"+'dt_Acrobot-v110.txt', 'rb')
 # f2 = open("decision_model/"+'dt_cartpole5.txt', 'rb')
 # f2 = open("decision_model/"+'dt_CartPole-v614.txt', 'rb')
-# f2 = open("decision_model/"+'dt_MountainCar5.txt', 'rb')
-# GAME = 'MountainCar-v0'
-GAME = 'Acrobot-v1'
+f2 = open("decision_model/"+'dt_MountainCar5.txt', 'rb')
+GAME = 'MountainCar-v0'
+# GAME = 'Acrobot-v1'
 # GAME = 'CartPole-v7'
 s2 = f2.read()
 clf2 = pickle.loads(s2)
@@ -25,15 +25,15 @@ TRAIN = False
 # TRAIN = True
 # TEST_RENDER = True
 TEST_RENDER = False  # display
-mixed_version = False
-# mixed_version = True
+# mixed_version = False
+mixed_version = True
 OUTPUT_GRAPH = False  # tensorboards
 LOG_DIR = './log'
 N_WORKERS = 16
 if TRAIN:
     MAX_GLOBAL_EP = 100000  # total episodes
 else:
-    MAX_GLOBAL_EP = 500  # total episodes
+    MAX_GLOBAL_EP = 1000  # total episodes
 MAX_ROUND_EP = 10000  # max steps each episode
 GLOBAL_NET_SCOPE = 'Global_Net'
 UPDATE_GLOBAL_ITER = 10

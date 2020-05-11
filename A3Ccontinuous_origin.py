@@ -10,20 +10,20 @@ import matplotlib.pyplot as plt
 
 # GAME = 'Pendulum-v0'
 # GAME = 'InvertedPendulum-v2'
-GAME = 'HalfCheetah-v2'
+GAME = 'Hopper-v1'
 # GAME = 'Ant-v2'
 # GAME = 'Walker2D-v3'
 OUTPUT_GRAPH = True
 LOG_DIR = './log'
 N_WORKERS = multiprocessing.cpu_count()
-MAX_EP_STEP = 10000
+MAX_EP_STEP = 1000
 MAX_GLOBAL_EP = 20000
 GLOBAL_NET_SCOPE = 'Global_Net'
 UPDATE_GLOBAL_ITER = 10
 GAMMA = 0.9
 ENTROPY_BETA = 0.01
 LR_A = 0.0001    # learning rate for actor
-LR_C = 0.001    # learning rate for critic
+LR_C = 0.0002    # learning rate for critic
 GLOBAL_RUNNING_R = []
 GLOBAL_EP = 0
 
@@ -120,8 +120,6 @@ class Worker(object):
             s = self.env.reset()
             ep_r = 0
             for ep_t in range(MAX_EP_STEP):
-                # if self.name == 'W_0':
-                #     self.env.render()
                 a = self.AC.choose_action(s)
                 s_, r, done, info = self.env.step(a)
                 done = True if ep_t == MAX_EP_STEP - 1 else False

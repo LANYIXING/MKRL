@@ -12,15 +12,15 @@ import plot_record as plot_record  # 画图与记录
 import time_record as time_record
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-# GAME = 'MountainCar-v0'
+GAME = 'MountainCar-v0'
 # GAME = 'Acrobot-v1'
-GAME = 'CartPole-v0'
+# GAME = 'CartPole-v0'
 TRAIN = False
 # TRAIN = True
 GETTING_DATA = False
 # GETTING_DATA = True
-TEST_RENDER = True
-# TEST_RENDER = False  # display
+# TEST_RENDER = True
+TEST_RENDER = False  # display
 OUTPUT_GRAPH = False  # tensorboard
 LOG_DIR = './log'
 # N_WORKERS = multiprocessing.cpu_count()
@@ -28,7 +28,7 @@ N_WORKERS = 16
 if TRAIN:
     MAX_GLOBAL_EP = 100000  # total episodes
 else:
-    MAX_GLOBAL_EP = 500  # total episodes
+    MAX_GLOBAL_EP = 1000  # total episodes
 MAX_ROUND_EP = 10000  # max steps each episode
 GLOBAL_NET_SCOPE = 'Global_Net'
 UPDATE_GLOBAL_ITER = 10
