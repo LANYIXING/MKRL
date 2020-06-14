@@ -15,8 +15,8 @@ conda create --name dtrl python=3.5
 conda activate dtrl
 pip install -r requirements.txt
 ```
-<img src="dt.png" width=25% align="right" />
-If you need to visualize the decision tree like fig above, please install graphviz in	http://www.graphviz.org/ 
+<img src="dt.png" width=50% align="right" />
+If you need to visualize the decision tree like fig, please install graphviz in	http://www.graphviz.org/ 
 
 ## File Descriptions
 
