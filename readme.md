@@ -24,19 +24,19 @@ If you need to visualize the decision tree like fig, please install graphviz in	
 
 #### 1. Oringinal RL, used to train and test the original RL algorithms and collect interactive data
 
-##### (1)A3C_Original.py
+##### (1) A3C_Original.py
 The A3C algorithm implement in discrete action version.
 ```bash
 python A3C_Original.py --mode 'train' --env "Acrobot-v1" --render False --load False
 --getting_data True
 ```
-##### (2)DPPO_Original.py
+##### (2) DPPO_Original.py
 The PPO algorithm implement for continuous action for Gym env.
 ```bash
 python DPPO_Original.py --mode 'train' --env "Pendulum-v1" --render False --load False --getting_data True
 ```
 
-##### (3)DPPO_MUJOCO_Original.py
+##### (3) DPPO_MUJOCO_Original.py
 The PPO algorithm implement for MUJOCO env.
 ```bash
 python DPPO_MUJOCO_Original.py --mode 'train' --env "BipedalWalke-v1" --render False --load False --getting_data True
@@ -49,13 +49,13 @@ python DPPO_MUJOCO_Original.py --mode 'train' --env "BipedalWalke-v1" --render F
 
 #### 2. Decision Tree, used to generate tree model for finding meta-knowledge for tasks
 
-##### (1)DecisionTree.py
+##### (1) DecisionTree.py
 Classification Decision Tree, it used for discrete action version.
 ```bash
 python DecisionTree.py --env "Acrobot-v1" 
 ```
 
-##### (2)RegressionDecisionTree.py
+##### (2) RegressionDecisionTree.py
 Regression Decision Tree, it used for discrete action version.
 ```bash
 python DRegressionDecisionTree.py --env "BipedalWalke-v1" 
@@ -63,18 +63,18 @@ python DRegressionDecisionTree.py --env "BipedalWalke-v1"
 
 #### 3. DTRL, utilize both the nonlinear fitting ability of RL algorithm and the interpretation of decision tree.
 
-##### (1)A3C_transfer.py
+##### (1) A3C_transfer.py
 The DTA3C algorithm implement in discrete action version.
 ```bash
 python A3C_transfer.py --mode 'train' --env "Acrobot-v1" --render False --load False --mixed_version True
 ```
-##### (2)DPPO_transfer.py
+##### (2) DPPO_transfer.py
 The DTPPO algorithm implement for continuous action for Gym env.
 ```bash
 python DPPO_transfer.py --mode 'train' --env "Pendulum-v1" --render False --load False --mixed_version True
 ```
 
-##### (3)DPPO_MUJOCO_Transfer.py
+##### (3) DPPO_MUJOCO_Transfer.py
 The DTPPO algorithm implement for MUJOCO env.
 ```bash
 python DPPO_MUJOCO_Transfer.py --mode 'test' --env "BipedalWalke-v1" --render False --load False --mixed_version True
