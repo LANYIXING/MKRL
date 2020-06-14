@@ -10,17 +10,17 @@ import threading
 import queue
 import os
 import time
-import plot_record as plot_record  # 画图与记录
-import time_record as time_record
+from utils import *
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 parser = argparse.ArgumentParser()
 # parser.add_argument('--mode', default='train', type=str)
 parser.add_argument('--mode', default='test', type=str)
-parser.add_argument("--env_name", default="Pendulum-v1")
+parser.add_argument('--load', default=True, type=bool)
+parser.add_argument("--env", default="Pendulum-v0")
 # parser.add_argument("--env_name", default="Hopper-v1")
-parser.add_argument('--test_iteration', default=500, type=int)
-parser.add_argument('--max_episode', default=4000, type=int)  # num of games
+parser.add_argument('--test_iteration', default=100, type=int)
+parser.add_argument('--max_episode', default=2000, type=int)  # num of games
 parser.add_argument('--max_step', default=200, type=int)  # num of games
 parser.add_argument('--n_workers', default=4, type=int)
 parser.add_argument('--A_LR', default=1e-4, type=float)
@@ -29,13 +29,13 @@ parser.add_argument('--batch_size', default=64, type=int)  # mini batch size
 parser.add_argument('--update_step', default=10, type=int)
 parser.add_argument('--epsilon', default=0.2, type=float)
 parser.add_argument('--gamma', default=0.9, type=int)  # discounted factor
-parser.add_argument('--getting_data', default=False, type=bool)
+parser.add_argument('--getting_data', default=True, type=bool)
 # parser.add_argument('--render', default=False, type=bool) # show UI or not
 # parser.add_argument('--exploration_noise', default=0.1, type=float)
 
 
 args = parser.parse_args()
-
+LOAD = args.load
 EP_MAX = args.max_episode
 EP_LEN = args.max_step
 N_WORKER = args.n_workers  # parallel workers
@@ -46,13 +46,16 @@ MIN_BATCH_SIZE = args.batch_size  # minimum batch size for updating PPO
 UPDATE_STEP = args.update_step  # loop update operation n-steps
 EPSILON = args.epsilon  # for clipping surrogate objective
 GAME = args.env_name
-S_DIM, A_DIM = 3, 1  # state and action dimension
+seed_setting = 600
 if args.mode is "train":
     EP_MAX = args.max_episode
 else:
     EP_MAX = args.test_iteration
     N_WORKER = 1
 start = time.time()
+env = gym.make(GAME)
+S_DIM = env.observation_space.shape[0]
+A_DIM = env.action_space.shape[0]
 
 
 class PPO(object):
@@ -89,8 +92,11 @@ class PPO(object):
 
         self.atrain_op = tf.train.AdamOptimizer(A_LR).minimize(self.aloss)
         if args.mode is "train":
-            self.sess.run(tf.global_variables_initializer())
-            self.saver = tf.train.Saver()
+            if LOAD is True:
+                self.restore()
+            else:
+                self.sess.run(tf.global_variables_initializer())
+                self.saver = tf.train.Saver()
         else:
             self.restore()
 
@@ -139,7 +145,7 @@ class PPO(object):
     def get_v(self, s):
         if s.ndim < 2:
             s = s[np.newaxis, :]
-        return self.sess.run(self.v, {self.tfs : s}) [0, 0]
+        return self.sess.run(self.v, {self.tfs: s})[0, 0]
 
     def restore(self):
         self.saver = tf.train.Saver()
@@ -149,10 +155,12 @@ class PPO(object):
         save_path = self.saver.save(self.sess, path + "/save_net.ckpt")
         print("model has saved in", save_path)
 
+
 class Worker(object):
     def __init__(self, wid):
         self.wid = wid
         self.env = gym.make(GAME).unwrapped
+        self.env.seed(seed_setting)
         self.ppo = GLOBAL_PPO
 
     def work(self):
@@ -176,7 +184,8 @@ class Worker(object):
                     s = s_
                     ep_r += r
 
-                    # count to minimum batch size, no need to wait other workers
+                    # count to minimum batch size, no need to wait other
+                    # workers
                     GLOBAL_UPDATE_COUNTER += 1
                     if t == EP_LEN - 1 or GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:
                         v_s_ = self.ppo.get_v(s_)
@@ -188,13 +197,14 @@ class Worker(object):
                         bs, ba, br = np.vstack(buffer_s), np.vstack(
                             buffer_a), np.array(discounted_r)[:, np.newaxis]
                         buffer_s, buffer_a, buffer_r = [], [], []
-                        QUEUE.put(np.hstack((bs, ba, br)))  # put data in the queue
+                        # put data in the queue
+                        QUEUE.put(np.hstack((bs, ba, br)))
                         if GLOBAL_UPDATE_COUNTER >= MIN_BATCH_SIZE:
                             ROLLING_EVENT.clear()  # stop collecting data
                             UPDATE_EVENT.set()  # globalPPO update
 
                         if GLOBAL_EP >= EP_MAX:  # stop training
-                            plot_record.plt_reward_step(
+                            plt_reward_step(
                                 GLOBAL_RUNNING_R=GLOBAL_RUNNING_R,
                                 GLOBAL_RUNNING_STEP=GLOBAL_RUNNING_STEP,
                                 title=GAME)
@@ -208,7 +218,7 @@ class Worker(object):
                     GLOBAL_RUNNING_R.append(
                         GLOBAL_RUNNING_R[-1] * 0.9 + ep_r * 0.1)
                 GLOBAL_EP += 1
-                time_record.print_time_information(
+                print_time_information(
                     start, GLOBAL_EP=GLOBAL_EP, MAX_GLOBAL_EP=EP_MAX)
 
                 print(
@@ -222,11 +232,11 @@ class Worker(object):
                     ep_r,
                 )
         else:
-            while not COORD.should_stop() :
+            while not COORD.should_stop():
                 s = self.env.reset()
                 ep_r = 0
                 buffer_s, buffer_a, buffer_r = [], [], []
-                for t in range(EP_LEN) :
+                for t in range(EP_LEN):
                     a = self.ppo.choose_action(s)
                     s_, r, done, _ = self.env.step(a)
                     buffer_s.append(s)
@@ -234,11 +244,12 @@ class Worker(object):
                     buffer_r.append(r)
                     s = s_
                     ep_r += r
-                    # count to minimum batch size, no need to wait other workers
-                    if t == EP_LEN - 1 or done :
+                    # count to minimum batch size, no need to wait other
+                    # workers
+                    if t == EP_LEN - 1 or done:
                         GLOBAL_RUNNING_STEP.append(t)
                         GLOBAL_RUNNING_R.append(ep_r)
-                        time_record.print_time_information(
+                        print_time_information(
                             start, GLOBAL_EP=GLOBAL_EP, MAX_GLOBAL_EP=EP_MAX)
                         data = np.array(buffer_s)
                         label = np.array(buffer_a)
@@ -246,15 +257,15 @@ class Worker(object):
                             buffer_s = []
                             buffer_a = []
                             buffer_r = []
-                            if GLOBAL_EP == 0 :
+                            if GLOBAL_EP == 0:
                                 GLOBAL_TRAINING_DATA = data
                                 GLOBAL_TRAINING_LABEL = label
-                            else :
+                            else:
                                 GLOBAL_TRAINING_DATA = np.concatenate(
                                     (GLOBAL_TRAINING_DATA, data), axis=0)
                                 GLOBAL_TRAINING_LABEL = np.concatenate(
                                     (GLOBAL_TRAINING_LABEL, label), axis=0)
-                            if GLOBAL_EP == EP_MAX - 2 :
+                            if GLOBAL_EP == EP_MAX - 2:
                                 np.save(
                                     "DATA/" + GAME + "/train_data_tree.npy",
                                     GLOBAL_TRAINING_DATA)
@@ -264,19 +275,22 @@ class Worker(object):
                                 print("The data for Decision tree is ready！")
 
                 GLOBAL_EP += 1
-                if GLOBAL_EP >= EP_MAX :  # stop training
-                    plot_record.plt_reward_step(
+                if GLOBAL_EP >= EP_MAX:  # stop training
+                    plt_reward_step(
                         GLOBAL_RUNNING_R=GLOBAL_RUNNING_R,
                         GLOBAL_RUNNING_STEP=GLOBAL_RUNNING_STEP,
                         title=GAME)
+                    sum_step = np.sum(GLOBAL_RUNNING_STEP)
+                    total_time = time.time() - start
+                    print('avg_time', total_time * 100 / sum_step)
+
                     COORD.request_stop()
                     break
 
-
                 # record reward changes, plot later
-                if len(GLOBAL_RUNNING_R) == 0 :
+                if len(GLOBAL_RUNNING_R) == 0:
                     GLOBAL_RUNNING_R.append(ep_r)
-                else :
+                else:
                     GLOBAL_RUNNING_R.append(ep_r)
                 GLOBAL_EP += 1
                 print(
@@ -289,7 +303,7 @@ class Worker(object):
                     '|Ep_r: %.2f' %
                     ep_r,
                 )
-            if GLOBAL_EP == EP_MAX - 1 :
+            if GLOBAL_EP == EP_MAX - 1:
                 np.save(
                     "DATA/" + GAME + "/train_data_tree.npy",
                     GLOBAL_TRAINING_DATA)

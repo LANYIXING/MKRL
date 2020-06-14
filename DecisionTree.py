@@ -6,10 +6,13 @@ import matplotlib.pyplot as plt
 from six import StringIO
 import pydot
 import pickle
+import argparse
 
-# task = "MountainCar"
-task = "CartPole-v6"
-# task = "Acrobot-v1"
+parser = argparse.ArgumentParser()
+parser.add_argument('--env', type=str, default="CartPole-v1")
+# parser.add_argument('--env', type=str, default="MountainCar-v0)
+args = parser.parse_args()
+task = args.env
 x = np.load("DATA/" + task + "/train_data_tree.npy")
 y = np.load("DATA/" + task + "/train_label_tree.npy")
 print("size=", np.size(y))
@@ -18,18 +21,21 @@ k_con = []
 score_con = []
 
 
-def get_feature_name(task_name="MountainCar"):
+def get_feature_name(task_name):
     feature_name = []
-    if task == "CartPole" or "CartPole-v6":
+    # bool_1 = task_name == "CartPole-v1" or task_name is "CartPole-v1-v6"
+    # 注意or！！！！
+    # is 比较内容相同，内容中地址相同
+    if task_name == 'CartPole-v1' or task_name == 'CartPole-v6':
         feature_name = ['Cart Position', 'Cart Velocity', 'Pole Angle', 'Pole Velocity At Tip']
-    elif task == "MountainCar":
+    elif task_name == "MountainCar-v0":
         feature_name = ['position', 'velocity']
-    elif task == "Acrobot-v1":
+    elif task_name == "Acrobot-v1":
         feature_name = ['cos(theta1)', 'sin(theta1)', 'cos(theta2)', 'sin(theta2)', 'thetaDot1', 'thetaDot2']
     return feature_name
 
 
-for k in range(1, 15):
+for k in range(1, 16):
     clf = DecisionTreeClassifier(max_depth=k)
     clf.fit(X_train, y_train)
     print('--------------------'
@@ -60,3 +66,4 @@ plt.ylabel('accuracy')
 plt.title(task)
 stt = "experiment_image/" + task + "分析图.png"
 plt.savefig(stt)
+print(score_con)

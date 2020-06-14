@@ -10,8 +10,7 @@ import threading
 import queue
 import os
 import time
-import plot_record as plot_record  # 画图与记录
-import time_record as time_record
+from utils import *
 import pickle
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 f2 = open("decision_model/" + 'dt_Pendulum-v014.txt', 'rb')
@@ -21,10 +20,10 @@ prob = rdt.tree_.impurity
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', default='test', type=str)
 # parser.add_argument('--mode', default='train', type=str)
-parser.add_argument("--env_name", default="Pendulum-v2")
+parser.add_argument("--env", default="Pendulum-v0")
 # parser.add_argument("--env_name", default="Hopper-v1")
-parser.add_argument('--test_iteration', default=500, type=int)
-parser.add_argument('--max_episode', default=1000, type=int)  # num of games
+parser.add_argument('--test_iteration', default=100, type=int)
+parser.add_argument('--max_episode', default=2000, type=int)  # num of games
 parser.add_argument('--max_step', default=200, type=int)  # num of games
 parser.add_argument('--n_workers', default=1, type=int)
 parser.add_argument('--A_LR', default=1e-4, type=float)
@@ -33,8 +32,11 @@ parser.add_argument('--batch_size', default=64, type=int)  # mini batch size
 parser.add_argument('--update_step', default=10, type=int)
 parser.add_argument('--epsilon', default=0.2, type=float)
 parser.add_argument('--gamma', default=0.9, type=int)  # discounted factor
-parser.add_argument('--threshold', default=0.08, type=float)  # discounted factor
-# parser.add_argument('--mixed_version', default=True, type=bool)
+parser.add_argument(
+    '--threshold',
+    default=0.08,
+    type=float)  # discounted factor
+# parser.add_argument('--mixed_version', default=False, type=bool)
 parser.add_argument('--mixed_version', default=True, type=bool)
 # parser.add_argument('--render', default=False, type=bool) # show UI or not
 # parser.add_argument('--exploration_noise', default=0.1, type=float)
@@ -51,14 +53,17 @@ C_LR = args.C_LR  # learning rate for critic
 MIN_BATCH_SIZE = args.batch_size  # minimum batch size for updating PPO
 UPDATE_STEP = args.update_step  # loop update operation n-steps
 EPSILON = args.epsilon  # for clipping surrogate objective
-GAME = args.env_name
-S_DIM, A_DIM = 3, 1  # state and action dimension
+GAME = args.env
 if args.mode is "train":
     EP_MAX = args.max_episode
 else:
     EP_MAX = args.test_iteration
     N_WORKER = 1
 start = time.time()
+PPO_interrupt = []
+env = gym.make(GAME)
+S_DIM = env.observation_space.shape[0]
+A_DIM = env.action_space.shape[0]
 
 
 class PPO(object):
@@ -87,6 +92,7 @@ class PPO(object):
         self.tfadv = tf.placeholder(tf.float32, [None, 1], 'advantage')
         # ratio = tf.exp(pi.log_prob(self.tfa) - oldpi.log_prob(self.tfa))
         ratio = pi.prob(self.tfa) / (oldpi.prob(self.tfa) + 1e-5)
+
         surr = ratio * self.tfadv  # surrogate loss
 
         self.aloss = -tf.reduce_mean(tf.minimum(  # clipped surrogate objective
@@ -215,8 +221,9 @@ class Worker(object):
                             ROLLING_EVENT.clear()
                             UPDATE_EVENT.set()
 
-                        if GLOBAL_EP >= EP_MAX or (np.array(GLOBAL_RUNNING_R[-20:]) > -300).all():  # stop training
-                            plot_record.plt_reward_step(
+                        if GLOBAL_EP >= EP_MAX or (
+                                np.array(GLOBAL_RUNNING_R[-20:]) > -300).all():  # stop training
+                            plt_reward_step(
                                 GLOBAL_RUNNING_R=GLOBAL_RUNNING_R,
                                 GLOBAL_RUNNING_STEP=GLOBAL_RUNNING_STEP,
                                 title=GAME)
@@ -232,7 +239,8 @@ class Worker(object):
                 GLOBAL_RUNNING_R.append(ep_r)
                 GLOBAL_EP += 1
                 print(with_PPO)
-                time_record.print_time_information(
+                PPO_interrupt.append(with_PPO)
+                print_time_information(
                     start, GLOBAL_EP=GLOBAL_EP, MAX_GLOBAL_EP=EP_MAX)
 
                 print(
@@ -279,17 +287,25 @@ class Worker(object):
                     if t == EP_LEN - 1 or done:
                         GLOBAL_RUNNING_STEP.append(t)
                         GLOBAL_RUNNING_R.append(ep_r)
-                        time_record.print_time_information(
+                        print_time_information(
                             start, GLOBAL_EP=GLOBAL_EP, MAX_GLOBAL_EP=EP_MAX)
                         print(with_PPO)
+                        PPO_interrupt.append(with_PPO)
                         # data = np.array(buffer_s)
                         # label = np.array(buffer_a)
                 GLOBAL_EP += 1
                 if GLOBAL_EP >= EP_MAX:  # stop training
-                    plot_record.plt_reward_step(
+                    plt_reward_step(
                         GLOBAL_RUNNING_R=GLOBAL_RUNNING_R,
                         GLOBAL_RUNNING_STEP=GLOBAL_RUNNING_STEP,
                         title=GAME)
+                    sum_PPO = np.sum(PPO_interrupt)
+                    print('sum_PPO', sum_PPO)
+                    sum_step = np.sum(GLOBAL_RUNNING_STEP)
+                    print('avg_interrupt', sum_PPO * 100 / sum_step)
+                    total_time = time.time() - start
+                    print('avg_time', total_time * 100 / sum_step)
+
                     COORD.request_stop()
                     break
                 # record reward changes, plot later
@@ -335,9 +351,9 @@ if __name__ == '__main__':
     if args.mode is "train":
         GLOBAL_PPO.save_net()
     # plot reward change and test
-
-    plt.plot(np.arange(len(GLOBAL_RUNNING_R)), GLOBAL_RUNNING_R)
-    plt.xlabel('Episode')
-    plt.ylabel('Moving reward')
-    plt.ion()
-    plt.show()
+    sum_PPO = np.sum(PPO_interrupt)
+    print('sum_PPO', sum_PPO)
+    sum_step = np.sum(GLOBAL_RUNNING_STEP)
+    print('avg_interrupt', sum_PPO * 100 / sum_step)
+    total_time = time.time() - start
+    print('avg_time', total_time * 100 / sum_step)
