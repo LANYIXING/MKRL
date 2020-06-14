@@ -1,4 +1,6 @@
 /A3C
 /DATA
 /PPO
+/decision_model
+/Visualization
 TEST_RECORD.csv

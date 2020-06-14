@@ -2,7 +2,6 @@ import gym
 import torch.nn as nn
 import torch.optim as optim
 import argparse
-import numpy as np
 from collections import deque
 from utils import *
 import time
@@ -13,17 +12,13 @@ parser.add_argument('--mode', default='train', type=str)
 # parser.add_argument('--env', type=str, default="Hopper-v1")
 # parser.add_argument('--env', type=str, default="Swimmer-v1")
 # parser.add_argument('--env', type=str, default="InvertedPendulum-v1")
-# parser.add_argument('--env', type=str, default="Humanoid-v1")
-# parser.add_argument('--env', type=str, default="Walker2d-v1")
 parser.add_argument('--env', type=str, default="BipedalWalker-v2")
 parser.add_argument('--render', default=False)
-# parser.add_argument('--render', default=True)
 parser.add_argument('--test_iteration', default=200, type=int)
 parser.add_argument('--max_episode', default=2000, type=int)  # num of games
 parser.add_argument('--getting_data', default=True, type=bool)
 parser.add_argument('--load', default=True, type=bool)
 args = parser.parse_args()
-# from ppo import train_model
 if args.mode is "train":
     EP_MAX = args.max_episode
 else:
