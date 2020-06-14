@@ -58,7 +58,7 @@ python DecisionTree.py --env "Acrobot-v1"
 ##### (2) RegressionDecisionTree.py
 Regression Decision Tree, it used for discrete action version.
 ```bash
-python DRegressionDecisionTree.py --env "BipedalWalke-v1" 
+python DRegressionDecisionTree.py --env "BipedalWalke-v2" 
 ```
 
 #### 3. DTRL, utilize both the nonlinear fitting ability of RL algorithm and the interpretation of decision tree.
@@ -77,7 +77,7 @@ python DPPO_transfer.py --mode 'train' --env "Pendulum-v1" --render False --load
 ##### (3) DPPO_MUJOCO_Transfer.py
 The DTPPO algorithm implement for MUJOCO env.
 ```bash
-python DPPO_MUJOCO_Transfer.py --mode 'test' --env "BipedalWalke-v1" --render False --load False --mixed_version True
+python DPPO_MUJOCO_Transfer.py --mode 'test' --env "BipedalWalke-v2" --render False --load False --mixed_version True
 ```
 
 ###### NOTE
