@@ -43,8 +43,8 @@ python DPPO_MUJOCO_Original.py --mode 'train' --env "BipedalWalke-v1" --render F
 ```
 
 ###### NOTE
-`--mode` 'train' or 'test'.
-`--load False`: if True, trained network is loaded during retraining.
+`--mode` 'train' or 'test'.  
+`--load False`: if True, trained network is loaded during retraining.  
 `--getting_data` True: if True, collect data for generating tree model when test.
 
 #### 2. Decision Tree, used to generate tree model for finding meta-knowledge for tasks
@@ -81,6 +81,6 @@ python DPPO_MUJOCO_Transfer.py --mode 'test' --env "BipedalWalke-v1" --render Fa
 ```
 
 ###### NOTE
-`--mode` 'train' or 'test'.
-`--load False`: if True, trained network is loaded during retraining.
-`--mixed_version` True: if True, DTRL, otheriwise, DT.
+`--mode` 'train' or 'test'.  
+`--load False`: if True, trained network is loaded during retraining.  
+`--mixed_version` True: if True, DTRL, otheriwise, DT.  
