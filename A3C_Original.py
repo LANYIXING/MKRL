@@ -384,6 +384,9 @@ if __name__ == "__main__":
     # SESS = tf.Session(config=config)
     COORD = tf.train.Coordinator()  # 设为全局变量
     path = "A3C/" + GAME
+    if os.path.exists(path) is False:
+        root_path = os.getcwd()
+        os.mkdir(root_path+path)
     main()
     print(GAME)
     sum_step = np.sum(GLOBAL_RUNNING_STEP)

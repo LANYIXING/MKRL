@@ -11,7 +11,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 seed_setting = 600
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', default='test', type=str)
-parser.add_argument('--env', type=str, default="MountainCar-v0-v0")
+parser.add_argument('--env', type=str, default="MountainCar-v0")
 parser.add_argument('--render', default=False)
 parser.add_argument('--test_iteration', default=500, type=int)
 parser.add_argument('--max_episode', default=4000, type=int)  # num of games
@@ -27,7 +27,7 @@ def load_dt(game):
         f2 = open("decision_model/" + 'dt_Acrobot-v111.txt', 'rb')
     elif game == "CartPole-v1-v1":
         f2 = open("decision_model/" + 'dt_cartpole5.txt', 'rb')
-    elif game == "MountainCar-v0-v0":
+    elif game == "MountainCar-v0":
         f2 = open("decision_model/" + 'dt_MountainCar7.txt', 'rb')
     return f2
 
@@ -402,6 +402,9 @@ if __name__ == "__main__":
     SESS = tf.Session()
     COORD = tf.train.Coordinator()  # 设为全局变量
     path = "A3C/" + GAME
+    if os.path.exists(path) is False:
+        root_path = os.getcwd()
+        os.mkdir(root_path+path)
     main()
     sum_A3C = np.sum(A3C_interrupt)
     print('sum_A3C', sum_A3C)
