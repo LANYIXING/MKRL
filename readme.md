@@ -1,10 +1,10 @@
-# DTRL
+# MKRL
 This project is for
-"Finding Explainable and Transferable Meta-Knowledge of Reinforcement Learning".
+"A Hybrid Policy through Interpretable and Transferable Meta-Knowledge with Reinforcement Learning"
 These algorithms will make original RL algorithms more interpretable and transferable. 
 In this project, We employ Asynchronous Advantage Actor-critic (A3C)
 and Proximal Policy Optimization (PPO) to combine DTRL,
-to form DTA3C and DTPPO respectively.
+to form MKA3C and MKPPO respectively.
 Optional envs include CartPole, MountainCar, Acrobot, Pendulum,InvertedPendulum, Swimmer, Hopper and BipedalWalke.
 
 ## Prerequisites 
@@ -61,21 +61,21 @@ Regression Decision Tree, it used for discrete action version.
 python DRegressionDecisionTree.py --env "BipedalWalke-v2" 
 ```
 
-#### 3. DTRL, utilize both the nonlinear fitting ability of RL algorithm and the interpretation of decision tree.
+#### 3. MKRL, utilize both the nonlinear fitting ability of RL algorithm and the interpretation of decision tree.
 
 ##### (1) A3C_transfer.py
-The DTA3C algorithm implement in discrete action version.
+The MKA3C algorithm implement in discrete action version.
 ```bash
 python A3C_transfer.py --mode 'train' --env "Acrobot-v1" --render False --load False --mixed_version True
 ```
 ##### (2) DPPO_transfer.py
-The DTPPO algorithm implement for continuous action for Gym env.
+The MKPPO algorithm implement for continuous action for Gym env.
 ```bash
 python DPPO_transfer.py --mode 'train' --env "Pendulum-v1" --render False --load False --mixed_version True
 ```
 
 ##### (3) DPPO_MUJOCO_Transfer.py
-The DTPPO algorithm implement for MUJOCO env.
+The MKPPO algorithm implement for MUJOCO env.
 ```bash
 python DPPO_MUJOCO_Transfer.py --mode 'test' --env "BipedalWalke-v2" --render False --load False --mixed_version True
 ```
@@ -83,4 +83,4 @@ python DPPO_MUJOCO_Transfer.py --mode 'test' --env "BipedalWalke-v2" --render Fa
 ###### NOTE
 `--mode` 'train' or 'test'.  
 `--load False`: if True, trained network is loaded during retraining.  
-`--mixed_version` True: if True, DTRL, otheriwise, DT.  
+`--mixed_version` True: if True, MKRL, otheriwise, DT.  
