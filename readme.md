@@ -1,9 +1,9 @@
 # MKRL
 This project is for
-"A Hybrid Policy through Interpretable and Transferable Meta-Knowledge with Reinforcement Learning"
+"Finding Interpretable and Transferable Meta-Knowledge for Reinforcement Learning"
 These algorithms will make original RL algorithms more interpretable and transferable. 
 In this project, We employ Asynchronous Advantage Actor-critic (A3C)
-and Proximal Policy Optimization (PPO) to combine DTRL,
+and Proximal Policy Optimization (PPO) to combine MKRL,
 to form MKA3C and MKPPO respectively.
 Optional envs include CartPole, MountainCar, Acrobot, Pendulum,InvertedPendulum, Swimmer, Hopper and BipedalWalke.
 
